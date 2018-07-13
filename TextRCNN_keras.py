@@ -107,7 +107,6 @@ class TextRCNN:
         
         self.model = Model(inputs = input_layer, outputs = output_layer)
          
-        print(self.model.summary())
         #printlog(self.model.summary())
         
     def train(self, x, y, *, val_x = None, val_y=None):
@@ -117,8 +116,8 @@ class TextRCNN:
         df_x = x
         df_y = y
         if val_x is not None and val_y is not None:
-            df_x = x + df_x
-            df_y = y + df_y
+            df_x = x + val_x
+            df_y = y + val_y
         
         # max_sequence_length is depending on the length of most samples.
         self.max_sequence_length = text_length_stat(df_x, 0.98)
