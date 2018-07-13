@@ -1,5 +1,4 @@
 from keras.layers import Input,Embedding,Flatten,Concatenate,Dense,Lambda,Dropout
-from keras.backend import mean, max
 from keras.layers import Conv1D,MaxPooling1D
 from keras.models import Model
 from keras.models import load_model
