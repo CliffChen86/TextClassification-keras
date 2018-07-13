@@ -208,7 +208,7 @@ class TextCNN:
         scores = self.model.evaluate(df_x, df_label, verbose = 1)
         
         #printlog(self.get_framework_name() + " " + self.get_model_name() + " " + "score process finished.")
-        return scores[1]
+        return scores
     
     def save(self, mp):
         #printlog(self.get_frameworks_name() + " " + self.get_model_name() + " " + "save process started.")
