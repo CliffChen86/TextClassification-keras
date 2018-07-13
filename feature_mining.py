@@ -6,7 +6,6 @@ from keras.utils import to_categorical
 import pandas as pd
 
 class NNTokenPadding:
-    #过滤掉符号，将每个词或者字映射成index
     def __init__(self, params, text_set):
         default_filter = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n'
         self.tokenizer = Tokenizer(num_words = params.get('num_words'), filters = default_filter + params.get('word_filter',''))
@@ -14,7 +13,6 @@ class NNTokenPadding:
         self.max_sequence_length = params.get('max_sequence_length',None)
     
     def extract(self, text_set):
-        #将文本转化成index组成的序列
         sequence = self.tokenizer.texts_to_sequences(text_set)
         word_index = self.tokenizer.word_index
         data = pad_sequences(sequence, self.max_sequence_length)
@@ -28,11 +26,9 @@ class LabelCategorizer:
         self.label_re_map = dict()
         
     def to_category(self, label, num_class=None):
-        #将数字label转换成one-hot形式
         return to_categorical(self.label_transform(label),num_class)
     
     def fit_on_labels(self, label):
-        #value_counts()是一个计数方法，对出现的数字进行统计
         temp = pd.DataFrame(label)[0].value_counts().index  
         label_num = len(temp)
         
