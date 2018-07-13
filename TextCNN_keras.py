@@ -178,7 +178,8 @@ class TextCNN:
         #start training
         history = self.model.fit(df_train, df_train_label,
                                  validation_data = (df_val, df_val_label),
-                                 epochs = self.model_train_batchsize,
+                                 epochs = self.model_epoch,
+                                 batch_size = self.model_train_batchsize,
                                  #callbacks=[cb, es],verbose = 1)
                                  callbacks=[es],verbose = 1)
         
