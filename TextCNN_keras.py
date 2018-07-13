@@ -1,11 +1,4 @@
-
-# coding: utf-8
-
-# In[ ]:
-
-
 from keras.layers import Input,Embedding,Flatten,Concatenate,Dense,Lambda,Dropout
-from keras.backend import mean, max
 from keras.layers import Conv1D,MaxPooling1D
 from keras.models import Model
 from keras.models import load_model
@@ -19,37 +12,17 @@ import numpy as np
 import time
 import pickle
 
-#w2v_path = './data/cc.zh.300.bin/'
-
-class ProgressExposure(Callback):
-
-    def __init__(self, total_batch, fp):
-        self.total_batch = total_batch
-        self.batch_count = 0
-        self.fp = fp
-    
-    def on_batch_end(self, batch, logs={}):
-        self.batch_count += 1
-        print("\nprogress:" + str(self.batch_count / self.total_batch))
-        with open(self.fp, 'a') as f:
-            f.write(str(self.batch_count / self.total_batch) + "\n")
-
-
 class TextCNN:
     def __init__(self, params):
-
         #printlogInit()
-
         self.model_name = 'CNN'
         self.framework_name = 'keras'
-
-        self.progress_fp = params.get('progress_fp',"progress")
 
         #w2v parameters
         self.default_w2v_fp = params.get('default_w2v_fp', None)
         self.w2v_fp = params.get('w2v_fp','default')
 
-        if self.w2v_fp != None:                    #there exist a w2v
+        if self.w2v_fp != None:                    # if there exist a w2v
             if self.w2v_fp == 'default':
                 self.w2v_fp = self.default_w2v_fp
             self.use_external_embedding = True
@@ -60,9 +33,7 @@ class TextCNN:
         self.embedding_dim = int(params.get('embedding_dim', 300))
         self.use_external_embedding = bool(params.get('use_external_embedding', False))
         self.embedding_trainable = bool(params.get('embedding_trainable', True))
-
         self.dropout_rate = float(params.get('dropout_rate', 0.5))
-
         self.filter_num = int(params.get('filter_num', 128))
 
         #self.filter_sizes = map(int, params.get('filter_size','3,4,5').split(','))
@@ -71,7 +42,6 @@ class TextCNN:
         for i in filter_size:
             temp.append(int(i))
         self.filter_sizes = temp
-
         self.conv_activation = params.get('conv_activation', 'tanh')
         self.conv_strides = int(params.get('conv_strides', 1))
         self.conv_padding = params.get('conv_padding', 'valid')
@@ -100,10 +70,7 @@ class TextCNN:
         self.model_train_batchsize = params.get('model_train_batchsize', 128)
         self.model_test_batchsize = params.get('model_test_batchsize', 1024)
 
-
-
-    
-    #printlog(self.get_framework_name() + " " + self.get_model_name() + " " + "initialization finished")
+        #printlog(self.get_framework_name() + " " + self.get_model_name() + " " + "initialization finished")
     
     def construct_graph(self, embedding_matrix = None):
         input_layer = Input(shape=(self.max_sequence_length, ))
@@ -121,7 +88,7 @@ class TextCNN:
                                         input_length = self.max_sequence_length,
                                         trainable=self.embedding_trainable)(input_layer)
         
-        #get conv-pool block for each filter size
+        # get conv-pool block for each filter size
         conv_blocks = []
         for i in range(len(self.filter_sizes)):
             conv = Conv1D(filters=self.filter_num,
@@ -161,17 +128,16 @@ class TextCNN:
         df_x = x
         df_y = y
         if val_x is not None and val_y is not None: 
-            #如果没有传入训练集，那么全部都是训练集
             df_x = x + val_x
             df_y = y + val_y
             
-        #max_sequence_length is depending on the length of most sanples. see txet_length_stat() method for details
+        # max_sequence_length is depending on the length of most samples. see txet_length_stat() method for details
         self.max_sequence_length = text_length_stat(df_x,0.98)
         self.tokenizer = NNTokenPadding(params = {'max_sequence_length': self.max_sequence_length}, text_set=df_x)
         
-        #transfer label set into one-hot sequence
+        # transfer label set into one-hot sequence
         df_x ,word_index = self.tokenizer.extract(df_x)
-        #transform label sets into one-hot sequence
+        # transform label sets into one-hot sequence
         self.labelCategorizer = LabelCategorizer()
         self.labelCategorizer.fit_on_labels(df_y)
         df_y = self.labelCategorizer.to_category(df_y)
@@ -181,10 +147,10 @@ class TextCNN:
         df_val = df_x[len(x):]
         df_val_label = df_y[len(y):]
         
-        #label_num is depending on the samples
+        # label_num is depending on the samples
         self.label_num = df_y.shape[1]
         
-        #vocab_size is depending on the word_index, which is the return of NNTokenPadding(),extract().
+        # vocab_size is depending on the word_index, which is the return of NNTokenPadding(),extract().
         self.vocab_size = len(word_index) + 1
         
         #get given embedding_matrix from given w2v file
@@ -217,11 +183,11 @@ class TextCNN:
                                  callbacks=[es],verbose = 1)
         
         self.train_report = history.history
-        
         train_end_time = time.time()
         self.train_cost_time = train_end_time - train_start_time
         
         #printlog(self.getframework_name() + " " + self.get_model_name() + "" + "train process finished.")
+        
     def predict(self, x):
         #printlog(self.get_framework_name() + "" + self.get_model_name() + "" + "predict process started")
         df_text, _ = self.tokenizer.extract(x)
@@ -245,21 +211,19 @@ class TextCNN:
     
     def save(self, mp):
         #printlog(self.get_frameworks_name() + " " + self.get_model_name() + " " + "save process started.")
-        
         self.model.save(mp + '.h5')
         pickle.dump(self.tokenizer, open(mp + '_tokenizer', 'wb'))
         self.labelCategorizer.save("./" + self.get_model_name() + '_label_map_relation.txt')
-        
         #printlog(self.get_framework_name() + " " + self.get_model_name() + " " + "save process finished.")
+        
     def load(self, mp):
         #printlog(self.get_framework_name() + " " + self.get_model_name() + " " + "load process started.")
-        
         self.model = load_model(mp + '.h5')
         self.tokenizer = pickle.load(open(mp + '_tokenizer', 'rb'))
         self.labelCategorizer = LabelCategorizer()
         self.labelCategorizer.load('./' + self.get_model_name() + '_label_map_relation.txt')
-        
         #printlog(self.get_framework_name() + " " + self.get_model_name() + " "  + "load process finished.")
+        
     def get_default_args(self):
         params = {
             'use_external_embedding' : False,
