@@ -1,9 +1,3 @@
-
-# coding: utf-8
-
-# In[ ]:
-
-
 from keras.layers import Input,Embedding,Flatten,Concatenate,Dense,Lambda,Dropout
 from keras.layers import LSTM, GRU, CuDNNLSTM, CuDNNGRU, Bidirectional
 from keras.backend import mean, max
@@ -51,12 +45,12 @@ class TextRCNN:
         self.dense_activation = params.get('dense_activation', 'tanh')
 
         # model parameters
-        self.model_loss = params.get('loss', 'categorical_crossentropy')
-        self.model_optimizer = params.get('optimizer', 'Adadelta')
-        self.model_metrics= [params.get('metrics', 'accuracy')]
-        self.model_epoch = int(params.get('epoch', 5))
-        self.model_train_batchsize = int(params.get('train_batchsize', 128))
-        self.model_test_batchsize = int(params.get('test_batchsize', 1024))
+        self.model_loss = params.get('model_loss', 'categorical_crossentropy')
+        self.model_optimizer = params.get('model_optimizer', 'Adadelta')
+        self.model_metrics= [params.get('model_metrics', 'accuracy')]
+        self.model_epoch = int(params.get('model_epoch', 5))
+        self.model_train_batchsize = int(params.get('model_train_batchsize', 128))
+        self.model_test_batchsize = int(params.get('model_test_batchsize', 1024))
 
         #printlog(self.get_framework_name() + " " + self.get_model_name() + " " + "initialization finished.") 
     
